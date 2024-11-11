@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Santa</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            text-align: center;
+            position: relative;
+        }
+        h1 {
+            color: #d62728;
+            font-size: 36px;
+            margin-bottom: 30px;
+        }
+        select, button {
+            font-size: 18px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .result {
+            font-size: 24px;
+            color: green;
+            font-weight: bold;
+            margin-top: 20px;
+            position: relative;
+            visibility: hidden;
+        }
+
+        .coal {
+            font-size: 24px;
+            color: black;
+            font-weight: bold;
+            margin-top: 20px;
+            visibility: hidden;
+            background-color: #d62728;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🎄 Secret Santa 🎄</h1>
+
+<select id="participantList">
+    <option value="" selected>Select your name</option>
+</select>
+
+<button onclick="assignSecretSanta()">Find Your Secret Santa!</button>
+
+<div class="result" id="result">Surprise!</div>
+<div class="coal" id="coal">🎅 You've been naughty! You're getting coal this year! 🎅</div>
+
+<script>
+    const participants = ["Jane", "Allan", "Josie", "Christina", "Andrew", "Hellie", "Susan", "Sandy", "Kirstie", "Susie P"];
+    const participantList = document.getElementById("participantList");
+    let selectedParticipant = '';
+    let hasSelected = false; // Track if a participant has already selected
+    let isReSelecting = false; // Track if the user is trying to re-select
+
+    // Populate the dropdown list with participants
+    participants.forEach(name => {
+        let option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        participantList.appendChild(option);
+    });
+
+    // Listen for participant selection
+    participantList.addEventListener("change", function() {
+        selectedParticipant = this.value;
+    });
+
+    // Function to assign a Secret Santa
+    function assignSecretSanta() {
+        if (!selectedParticipant) {
+            alert("Please select your name first!");
+            return;
+        }
+
+        // If they've already selected once, prevent further selections
+        if (hasSelected) {
+            if (selectedParticipant !== '') {
+                // If they select their own name again after already selecting, show coal message
+                document.getElementById("coal").style.visibility = "visible";
+            }
+            return;
+        }
+
+        // Mark as selected
+        hasSelected = true;
+
+        // Remove selected option from the dropdown list
+        participantList.querySelector(`option[value="${selectedParticipant}"]`).disabled = true;
+
+        // Show Secret Santa result
+        revealResult();
+    }
+
+    // Reveal the Secret Santa result
+    function revealResult() {
+        let potentialReceivers = participants.filter(name => name !== selectedParticipant);
+        let selectedReceiver = potentialReceivers[Math.floor(Math.random() * potentialReceivers.length)];
+
+        let resultElement = document.getElementById("result");
+        resultElement.textContent = `Your Secret Santa is: ${selectedReceiver}!`;
+
+        resultElement.style.visibility = "visible";
+
+        // Google Analytics: Track the Secret Santa reveal
+        gtag('event', 'secret_santa_reveal', {
+            'event_category': 'Secret Santa',
+            'event_label': selectedReceiver,
+            'value': 1
+        });
+    }
+
+    // Google Analytics Setup
+    (function() {
+        const script = document.createElement("script");
+        script.async = true;
+        script.src = "https://www.googletagmanager.com/gtag/js?id=UA-466684428-1";
+        document.head.appendChild(script);
+
+        script.onload = function() {
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'UA-466684428-1');
+        };
+    })();
+</script>
+
+</body>
+</html>
