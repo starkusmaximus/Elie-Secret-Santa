@@ -41,6 +41,16 @@
             border-radius: 5px;
         }
     </style>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RNXWNGXZ0Z"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-RNXWNGXZ0Z');
+    </script>
 </head>
 <body>
 
@@ -110,29 +120,7 @@
         resultElement.textContent = `Your Secret Santa is: ${selectedReceiver}!`;
 
         resultElement.style.visibility = "visible";
-
-        // Google Analytics: Track the Secret Santa reveal
-        gtag('event', 'secret_santa_reveal', {
-            'event_category': 'Secret Santa',
-            'event_label': selectedReceiver,
-            'value': 1
-        });
     }
-
-    // Google Analytics Setup
-    (function() {
-        const script = document.createElement("script");
-        script.async = true;
-        script.src = "https://www.googletagmanager.com/gtag/js?id=UA-466684428-1";
-        document.head.appendChild(script);
-
-        script.onload = function() {
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'UA-466684428-1');
-        };
-    })();
 </script>
 
 </body>
