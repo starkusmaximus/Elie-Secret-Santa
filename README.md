@@ -16,7 +16,46 @@
     </script>
 
     <style>
-        /* Your existing styles here */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            text-align: center;
+            position: relative;
+        }
+        h1 {
+            color: #d62728;
+            font-size: 36px;
+            margin-bottom: 30px;
+        }
+        select, button {
+            font-size: 18px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .result {
+            font-size: 24px;
+            color: green;
+            font-weight: bold;
+            margin-top: 20px;
+            position: relative;
+            visibility: hidden;
+        }
+        .coal {
+            font-size: 24px;
+            color: black;
+            font-weight: bold;
+            margin-top: 20px;
+            visibility: hidden;
+            background-color: #d62728;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .countdown {
+            font-size: 48px;
+            font-weight: bold;
+            margin-top: 30px;
+            color: #d62728;
+        }
     </style>
 </head>
 <body>
