@@ -65,7 +65,7 @@
     <option value="" selected>Select your name</option>
 </select>
 
-<button onclick="assignSecretSanta(); trackEvent()">Find Your Secret Santa!</button>
+<button onclick="assignSecretSanta(); trackEvent('button', 'Find Your Secret Santa Button')">Find Your Secret Santa!</button>
 
 <div class="result" id="result">Surprise!</div>
 <div class="coal" id="coal">🎅 You've been naughty! You're getting coal this year! 🎅</div>
@@ -74,16 +74,17 @@
 <script>
     // Define families and participants
     const families = {
-        "Family1": ["Jane", "Allan", "Josie"],
-        "Family2": ["Christina", "Andrew", "Hellie"],
-        "Family3": ["Susan", "Sandy", "Kirstie"],
-        "Family4": ["Susie P"]
+        "Family1": ["Jane", "Allan", "Josie", "Christina", "Kalvin"],
+        "Family2": ["Andrew", "Hellie", "Susan", "Sandy"],
+        "Family3": ["Paul", "Susie P", "Kirstie", "Mac"],
+        "Family4": ["Liz", "Duncan"]
     };
 
     const participants = [].concat(...Object.values(families)); // Flatten family arrays into a single participants list
     const participantList = document.getElementById("participantList");
     let selectedParticipant = '';
-    let hasSelected = false;
+    let hasSelected = false; // Flag to track if they've selected already
+    let secondSelectionInProgress = false; // Flag to track if they're trying to reselect after a countdown
 
     // Populate the dropdown list with participants
     participants.forEach(name => {
@@ -96,6 +97,14 @@
     // Listen for participant selection
     participantList.addEventListener("change", function() {
         selectedParticipant = this.value;
+        // Track name selection from dropdown
+        if (selectedParticipant) {
+            gtag('event', 'select', {
+                'event_category': 'Participant Selection',
+                'event_label': selectedParticipant,
+                'value': 1
+            });
+        }
     });
 
     // Function to get a cookie by name
@@ -122,17 +131,18 @@
             return;
         }
 
-        // Check if a participant has already selected
-        if (getCookie('hasSelected')) {
-            // If they've already selected, show coal message when trying again
-            document.getElementById("coal").style.visibility = "visible";
+        // If they've already selected once, show countdown and coal message
+        if (hasSelected) {
+            if (!secondSelectionInProgress) {
+                secondSelectionInProgress = true;
+                // Show countdown and wait for it to finish before showing coal
+                startCountdown();
+            }
             return;
         }
 
         // Mark as selected
         hasSelected = true;
-
-        // Disable the dropdown after selection
         setCookie('hasSelected', 'true', 30); // Cookie expires in 30 days
 
         // Show countdown before revealing Secret Santa
@@ -151,9 +161,25 @@
             if (count === 0) {
                 clearInterval(interval);  // Stop the countdown
                 countdownElement.style.visibility = "hidden";  // Hide countdown
-                revealResult();  // Reveal Secret Santa
+                if (secondSelectionInProgress) {
+                    showCoalMessage();  // Show coal message after second selection
+                } else {
+                    revealResult();  // Reveal Secret Santa after initial selection
+                }
             }
         }, 1000);
+    }
+
+    // Show coal message if a second selection is made
+    function showCoalMessage() {
+        document.getElementById("coal").style.visibility = "visible";
+
+        // Track coal message display
+        gtag('event', 'show', {
+            'event_category': 'Naughty Message',
+            'event_label': 'Coal for Christmas',
+            'value': 1
+        });
     }
 
     // Reveal the Secret Santa result with family check
@@ -171,21 +197,20 @@
         resultElement.textContent = `Your Secret Santa is: ${selectedReceiver}!`;
 
         resultElement.style.visibility = "visible";
+
+        // Track Secret Santa result
+        gtag('event', 'reveal', {
+            'event_category': 'Secret Santa Result',
+            'event_label': selectedReceiver,
+            'value': 1
+        });
     }
 
-    // Listen for changes in the dropdown after selection
-    participantList.addEventListener('click', function() {
-        if (getCookie('hasSelected')) {
-            // If the participant has already selected, show coal message
-            document.getElementById("coal").style.visibility = "visible";
-        }
-    });
-
-    // Track button click event
-    function trackEvent() {
-        gtag('event', 'click', {
+    // Track any button click event
+    function trackEvent(action, label) {
+        gtag('event', action, {
             'event_category': 'Button Clicks',
-            'event_label': 'Find Your Secret Santa Button',
+            'event_label': label,
             'value': 1
         });
     }
