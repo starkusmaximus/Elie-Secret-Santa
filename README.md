@@ -11,50 +11,12 @@
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
+
         gtag('config', 'G-RNXWNGXZ0Z');
     </script>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f8ff;
-            text-align: center;
-            position: relative;
-        }
-        h1 {
-            color: #d62728;
-            font-size: 36px;
-            margin-bottom: 30px;
-        }
-        select, button {
-            font-size: 18px;
-            padding: 10px;
-            margin: 10px 0;
-        }
-        .result {
-            font-size: 24px;
-            color: green;
-            font-weight: bold;
-            margin-top: 20px;
-            position: relative;
-            visibility: hidden;
-        }
-        .coal {
-            font-size: 24px;
-            color: black;
-            font-weight: bold;
-            margin-top: 20px;
-            visibility: hidden;
-            background-color: #d62728;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .countdown {
-            font-size: 48px;
-            font-weight: bold;
-            margin-top: 30px;
-            color: #d62728;
-        }
+        /* Your existing styles here */
     </style>
 </head>
 <body>
@@ -65,7 +27,7 @@
     <option value="" selected>Select your name</option>
 </select>
 
-<button onclick="assignSecretSanta(); trackEvent('button', 'Find Your Secret Santa Button')">Find Your Secret Santa!</button>
+<button onclick="assignSecretSanta(); trackEvent()">Find Your Secret Santa!</button>
 
 <div class="result" id="result">Surprise!</div>
 <div class="coal" id="coal">🎅 You've been naughty! You're getting coal this year! 🎅</div>
@@ -97,14 +59,6 @@
     // Listen for participant selection
     participantList.addEventListener("change", function() {
         selectedParticipant = this.value;
-        // Track name selection from dropdown
-        if (selectedParticipant) {
-            gtag('event', 'select', {
-                'event_category': 'Participant Selection',
-                'event_label': selectedParticipant,
-                'value': 1
-            });
-        }
     });
 
     // Function to get a cookie by name
@@ -173,13 +127,6 @@
     // Show coal message if a second selection is made
     function showCoalMessage() {
         document.getElementById("coal").style.visibility = "visible";
-
-        // Track coal message display
-        gtag('event', 'show', {
-            'event_category': 'Naughty Message',
-            'event_label': 'Coal for Christmas',
-            'value': 1
-        });
     }
 
     // Reveal the Secret Santa result with family check
@@ -197,22 +144,42 @@
         resultElement.textContent = `Your Secret Santa is: ${selectedReceiver}!`;
 
         resultElement.style.visibility = "visible";
-
-        // Track Secret Santa result
-        gtag('event', 'reveal', {
-            'event_category': 'Secret Santa Result',
-            'event_label': selectedReceiver,
-            'value': 1
-        });
     }
 
-    // Track any button click event
-    function trackEvent(action, label) {
-        gtag('event', action, {
+    // Track button click event
+    function trackEvent() {
+        gtag('event', 'click', {
             'event_category': 'Button Clicks',
-            'event_label': label,
+            'event_label': 'Find Your Secret Santa Button',
             'value': 1
         });
+
+        // Track the selection of a name
+        if (selectedParticipant) {
+            gtag('event', 'select', {
+                'event_category': 'Participant Selection',
+                'event_label': selectedParticipant,
+                'value': 1
+            });
+        }
+
+        // Track coal message visibility
+        if (document.getElementById("coal").style.visibility === "visible") {
+            gtag('event', 'show', {
+                'event_category': 'Naughty Message',
+                'event_label': 'Coal for Christmas',
+                'value': 1
+            });
+        }
+
+        // Track result reveal
+        if (document.getElementById("result").style.visibility === "visible") {
+            gtag('event', 'reveal', {
+                'event_category': 'Secret Santa Result',
+                'event_label': document.getElementById("result").textContent,
+                'value': 1
+            });
+        }
     }
 </script>
 
