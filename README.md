@@ -11,7 +11,6 @@
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-
         gtag('config', 'G-RNXWNGXZ0Z');
     </script>
 
@@ -66,7 +65,7 @@
     <option value="" selected>Select your name</option>
 </select>
 
-<button onclick="assignSecretSanta(); trackEvent()">Find Your Secret Santa!</button>
+<button onclick="assignSecretSanta(); trackEvent('button_click', 'Find Your Secret Santa Button')">Find Your Secret Santa!</button>
 
 <div class="result" id="result">Surprise!</div>
 <div class="coal" id="coal">🎅 You've been naughty! You're getting coal this year! 🎅</div>
@@ -75,10 +74,10 @@
 <script>
     // Define families and participants
     const families = {
-        "Family1": ["Jane", "Allan", "Josie", "Christina", "Kalvin"],
-        "Family2": ["Andrew", "Hellie", "Susan", "Sandy"],
-        "Family3": ["Paul", "Susie P", "Kirstie", "Mac"],
-        "Family4": ["Liz", "Duncan"]
+        "Family1": ["Jane", "Allan", "Josie"],
+        "Family2": ["Christina", "Andrew", "Hellie"],
+        "Family3": ["Susan", "Sandy", "Kirstie"],
+        "Family4": ["Susie P"]
     };
 
     const participants = [].concat(...Object.values(families)); // Flatten family arrays into a single participants list
@@ -98,6 +97,7 @@
     // Listen for participant selection
     participantList.addEventListener("change", function() {
         selectedParticipant = this.value;
+        trackEvent('name_input', selectedParticipant); // Track name input
     });
 
     // Function to get a cookie by name
@@ -130,6 +130,7 @@
                 secondSelectionInProgress = true;
                 // Show countdown and wait for it to finish before showing coal
                 startCountdown();
+                trackEvent('second_selection_attempt', selectedParticipant); // Track second selection attempt
             }
             return;
         }
@@ -140,6 +141,7 @@
 
         // Show countdown before revealing Secret Santa
         startCountdown();
+        trackEvent('name_selected', selectedParticipant); // Track name selection
     }
 
     // Countdown function
@@ -166,6 +168,7 @@
     // Show coal message if a second selection is made
     function showCoalMessage() {
         document.getElementById("coal").style.visibility = "visible";
+        trackEvent('coal_message_shown', selectedParticipant); // Track coal message shown
     }
 
     // Reveal the Secret Santa result with family check
@@ -183,42 +186,16 @@
         resultElement.textContent = `Your Secret Santa is: ${selectedReceiver}!`;
 
         resultElement.style.visibility = "visible";
+        trackEvent('secret_santa_revealed', selectedReceiver); // Track Secret Santa result
     }
 
-    // Track button click event
-    function trackEvent() {
-        gtag('event', 'click', {
-            'event_category': 'Button Clicks',
-            'event_label': 'Find Your Secret Santa Button',
+    // Track custom events
+    function trackEvent(eventType, eventLabel) {
+        gtag('event', eventType, {
+            'event_category': 'Secret Santa',
+            'event_label': eventLabel,
             'value': 1
         });
-
-        // Track the selection of a name
-        if (selectedParticipant) {
-            gtag('event', 'select', {
-                'event_category': 'Participant Selection',
-                'event_label': selectedParticipant,
-                'value': 1
-            });
-        }
-
-        // Track coal message visibility
-        if (document.getElementById("coal").style.visibility === "visible") {
-            gtag('event', 'show', {
-                'event_category': 'Naughty Message',
-                'event_label': 'Coal for Christmas',
-                'value': 1
-            });
-        }
-
-        // Track result reveal
-        if (document.getElementById("result").style.visibility === "visible") {
-            gtag('event', 'reveal', {
-                'event_category': 'Secret Santa Result',
-                'event_label': document.getElementById("result").textContent,
-                'value': 1
-            });
-        }
     }
 </script>
 
