@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secret Santa</title>
-    
+
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RNXWNGXZ0Z"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-
         gtag('config', 'G-RNXWNGXZ0Z');
     </script>
 
@@ -40,7 +39,6 @@
             position: relative;
             visibility: hidden;
         }
-
         .coal {
             font-size: 24px;
             color: black;
@@ -50,6 +48,12 @@
             background-color: #d62728;
             padding: 10px;
             border-radius: 5px;
+        }
+        .countdown {
+            font-size: 48px;
+            font-weight: bold;
+            margin-top: 30px;
+            color: #d62728;
         }
     </style>
 </head>
@@ -61,17 +65,25 @@
     <option value="" selected>Select your name</option>
 </select>
 
-<button onclick="assignSecretSanta()">Find Your Secret Santa!</button>
+<button onclick="assignSecretSanta(); trackEvent()">Find Your Secret Santa!</button>
 
 <div class="result" id="result">Surprise!</div>
 <div class="coal" id="coal">🎅 You've been naughty! You're getting coal this year! 🎅</div>
+<div id="countdown" class="countdown"></div>
 
 <script>
-    const participants = ["Jane", "Allan", "Josie", "Christina", "Andrew", "Hellie", "Susan", "Sandy", "Kirstie", "Susie P"];
+    // Define families and participants
+    const families = {
+        "Family1": ["Jane", "Allan", "Josie"],
+        "Family2": ["Christina", "Andrew", "Hellie"],
+        "Family3": ["Susan", "Sandy", "Kirstie"],
+        "Family4": ["Susie P"]
+    };
+
+    const participants = [].concat(...Object.values(families)); // Flatten family arrays into a single participants list
     const participantList = document.getElementById("participantList");
     let selectedParticipant = '';
-    let hasSelected = false; // Track if a participant has already selected
-    let isReSelecting = false; // Track if the user is trying to re-select
+    let hasSelected = false;
 
     // Populate the dropdown list with participants
     participants.forEach(name => {
@@ -86,6 +98,23 @@
         selectedParticipant = this.value;
     });
 
+    // Function to get a cookie by name
+    function getCookie(name) {
+        let cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            let [key, value] = cookie.trim().split('=');
+            if (key === name) return value;
+        }
+        return null;
+    }
+
+    // Function to set a cookie
+    function setCookie(name, value, days) {
+        let date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
+    }
+
     // Function to assign a Secret Santa
     function assignSecretSanta() {
         if (!selectedParticipant) {
@@ -93,34 +122,72 @@
             return;
         }
 
-        // If they've already selected once, prevent further selections
-        if (hasSelected) {
-            if (selectedParticipant !== '') {
-                // If they select their own name again after already selecting, show coal message
-                document.getElementById("coal").style.visibility = "visible";
-            }
+        // Check if a participant has already selected
+        if (getCookie('hasSelected')) {
+            // If they've already selected, show coal message when trying again
+            document.getElementById("coal").style.visibility = "visible";
             return;
         }
 
         // Mark as selected
         hasSelected = true;
 
-        // Remove selected option from the dropdown list
-        participantList.querySelector(`option[value="${selectedParticipant}"]`).disabled = true;
+        // Disable the dropdown after selection
+        setCookie('hasSelected', 'true', 30); // Cookie expires in 30 days
 
-        // Show Secret Santa result
-        revealResult();
+        // Show countdown before revealing Secret Santa
+        startCountdown();
     }
 
-    // Reveal the Secret Santa result
+    // Countdown function
+    function startCountdown() {
+        let countdownElement = document.getElementById("countdown");
+        let count = 3;
+        countdownElement.textContent = count;
+
+        let interval = setInterval(function() {
+            count--;
+            countdownElement.textContent = count;
+            if (count === 0) {
+                clearInterval(interval);  // Stop the countdown
+                countdownElement.style.visibility = "hidden";  // Hide countdown
+                revealResult();  // Reveal Secret Santa
+            }
+        }, 1000);
+    }
+
+    // Reveal the Secret Santa result with family check
     function revealResult() {
-        let potentialReceivers = participants.filter(name => name !== selectedParticipant);
+        // Get the family of the selected participant
+        let selectedFamily = Object.keys(families).find(family => families[family].includes(selectedParticipant));
+
+        // Filter potential receivers to exclude the same family
+        let potentialReceivers = participants.filter(name => name !== selectedParticipant && !families[selectedFamily].includes(name));
+        
+        // Select a random receiver from the filtered list
         let selectedReceiver = potentialReceivers[Math.floor(Math.random() * potentialReceivers.length)];
 
         let resultElement = document.getElementById("result");
         resultElement.textContent = `Your Secret Santa is: ${selectedReceiver}!`;
 
         resultElement.style.visibility = "visible";
+    }
+
+    // Listen for changes in the dropdown after selection
+    participantList.addEventListener('click', function() {
+        if (getCookie('hasSelected')) {
+            // If the participant has already selected, show coal message
+            document.getElementById("coal").style.visibility = "visible";
+        }
+    });
+
+    // Track button click event
+    function trackEvent() {
+        gtag('event', 'click', {
+            'event_category': 'Button Clicks',
+            'event_label': 'Find Your Secret Santa Button',
+            'value': 1
+        });
     }
 </script>
 
